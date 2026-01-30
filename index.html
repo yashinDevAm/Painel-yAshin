@@ -5,49 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Yashin Admin - Control Panel</title>
     
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDTxuvp-qS6s8UaugTXWk_gebJdZugFWhw",
-            authDomain: "painel-loginyashin.firebaseapp.com",
-            databaseURL: "https://painel-loginyashin-default-rtdb.firebaseio.com",
-            projectId: "painel-loginyashin",
-            storageBucket: "painel-loginyashin.firebasestorage.app",
-            messagingSenderId: "618872308688",
-            appId: "1:618872308688:web:9d9d4ac17aa4d2ae4e6fd5"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        window.gerarKey = function() {
-            const key = "YASHIN-" + Math.random().toString(36).substr(2, 8).toUpperCase();
-            const dias = parseInt(document.getElementById('tempo').value);
-            const expiracao = new Date().getTime() + (dias * 24 * 60 * 60 * 1000);
-
-            set(ref(db, 'keys/' + key), {
-                expiry: expiracao,
-                status: "active",
-                created_at: new Date().toISOString()
-            }).then(() => {
-                const res = document.getElementById('keyResult');
-                res.innerText = key;
-                res.classList.add('active');
-            }).catch(e => alert("Erro: Verifique as regras do Firebase!"));
-        }
-
-        window.copyKey = function() {
-            const text = document.getElementById('keyResult').innerText;
-            navigator.clipboard.writeText(text);
-            const btn = document.querySelector('.btn-gen');
-            const originalText = btn.innerText;
-            btn.innerText = "COPIADO!";
-            setTimeout(() => btn.innerText = originalText, 2000);
-        }
-    </script>
-
     <style>
         :root { 
             --accent: #0078d4; 
@@ -68,8 +25,182 @@
             color: #ccc;
         }
 
-        /* --- DESIGN IDENTICO AO MOD MENU --- */
         .admin-card {
+            width: 90%; 
+            max-width: 340px; 
+            padding: 35px 25px;
+            background: var(--bg-glass); 
+            border: 1px solid var(--border-glass);
+            border-radius: 15px; 
+            backdrop-filter: blur(20px); 
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+
+        h1 { 
+            color: var(--accent); 
+            font-size: 16px; 
+            letter-spacing: 4px; 
+            margin-bottom: 30px; 
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--accent-glow);
+            margin-top: 0;
+        }
+
+        .section-header {
+            margin: 20px 0 10px 0;
+            border-left: 3px solid var(--accent);
+            padding-left: 12px;
+            text-align: left;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        select {
+            width: 100%; 
+            padding: 12px; 
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass); 
+            border-radius: 8px;
+            color: #fff; 
+            outline: none; 
+            margin-bottom: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+
+        .btn-gen {
+            width: 100%; 
+            padding: 14px; 
+            background: var(--accent);
+            border: none; 
+            border-radius: 8px; 
+            color: #fff; 
+            font-weight: bold;
+            cursor: pointer; 
+            letter-spacing: 1px;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-gen:active { transform: scale(0.98); opacity: 0.8; }
+
+        #keyResult {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed var(--accent);
+            color: #fff;
+            font-family: monospace;
+            font-size: 16px;
+            border-radius: 8px;
+            display: none;
+            cursor: pointer;
+            word-break: break-all;
+        }
+
+        #keyResult.active { display: block; animation: glow 1.5s infinite alternate; }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(0, 120, 212, 0.2); }
+            to { box-shadow: 0 0 15px rgba(0, 120, 212, 0.5); }
+        }
+
+        .footer-text {
+            font-size: 10px;
+            color: #444;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-card">
+        <h1>Admin Control</h1>
+        
+        <div class="section-header">
+            <h2>Configuração de Key</h2>
+        </div>
+
+        <select id="tempo">
+            <option value="1">24 HORAS (TESTE)</option>
+            <option value="7">7 DIAS (SEMANAL)</option>
+            <option value="30">30 DIAS (MENSAL)</option>
+            <option value="365">ACESSO VITALÍCIO</option>
+        </select>
+
+        <button class="btn-gen" id="btnMain">Gerar Acesso</button>
+
+        <div id="keyResult"></div>
+        
+        <p class="footer-text" id="statusMsg">Toque na key para copiar</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTxuvp-qS6s8UaugTXWk_gebJdZugFWhw",
+            authDomain: "painel-loginyashin.firebaseapp.com",
+            databaseURL: "https://painel-loginyashin-default-rtdb.firebaseio.com",
+            projectId: "painel-loginyashin",
+            storageBucket: "painel-loginyashin.firebasestorage.app",
+            messagingSenderId: "618872308688",
+            appId: "1:618872308688:web:9d9d4ac17aa4d2ae4e6fd5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const btn = document.getElementById('btnMain');
+        const keyResult = document.getElementById('keyResult');
+
+        btn.addEventListener('click', () => {
+            const key = "YASHIN-" + Math.random().toString(36).substr(2, 8).toUpperCase();
+            const dias = parseInt(document.getElementById('tempo').value);
+            const expiracao = new Date().getTime() + (dias * 24 * 60 * 60 * 1000);
+
+            set(ref(db, 'keys/' + key), {
+                expiry: expiracao,
+                status: "active",
+                created_at: new Date().toISOString()
+            }).then(() => {
+                keyResult.innerText = key;
+                keyResult.classList.add('active');
+                btn.innerText = "KEY GERADA!";
+                setTimeout(() => { btn.innerText = "GERAR NOVA KEY"; }, 2000);
+            }).catch(e => {
+                alert("Erro: Verifique as regras do Firebase!");
+                console.error(e);
+            });
+        });
+
+        keyResult.addEventListener('click', () => {
+            const text = keyResult.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const msg = document.getElementById('statusMsg');
+                msg.innerText = "COPIADO COM SUCESSO!";
+                msg.style.color = "#00ff00";
+                setTimeout(() => { 
+                    msg.innerText = "Toque na key para copiar"; 
+                    msg.style.color = "#444";
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
             width: 90%; 
             max-width: 340px; 
             padding: 35px 25px;
