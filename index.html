@@ -2,11 +2,13 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Admin - Gerador de Keys</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yashin Admin | Premium Key Gen</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
+        // Suas configurações do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDTxuvp-qS6s8UaugTXWk_gebJdZugFWhw",
             authDomain: "painel-loginyashin.firebaseapp.com",
@@ -21,38 +23,163 @@
         const db = getDatabase(app);
 
         window.gerarKey = function() {
+            const btn = document.querySelector('button');
+            const keyResult = document.getElementById('keyResult');
+            
             const key = "YASHIN-" + Math.random().toString(36).substr(2, 8).toUpperCase();
             const dias = parseInt(document.getElementById('tempo').value);
             const expiracao = new Date().getTime() + (dias * 24 * 60 * 60 * 1000);
 
             set(ref(db, 'keys/' + key), {
                 expiry: expiracao,
-                status: "active"
+                status: "active",
+                created_at: new Date().toISOString()
             }).then(() => {
-                const res = document.getElementById('keyResult');
-                res.innerText = key;
-                res.style.display = "block";
-            }).catch(e => alert("Erro: Verifique as REGRAS do Firebase Database!"));
+                keyResult.innerText = key;
+                keyResult.classList.add('show');
+                btn.innerText = "KEY GERADA!";
+                setTimeout(() => btn.innerText = "GERAR NOVA KEY", 2000);
+            }).catch(e => alert("Erro nas Regras do Firebase!"));
+        }
+
+        window.copyKey = function() {
+            const text = document.getElementById('keyResult').innerText;
+            navigator.clipboard.writeText(text);
+            alert("Copiado para a área de transferência!");
         }
     </script>
     <style>
-        body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: #111; padding: 30px; border-radius: 12px; border: 1px solid #0078d4; text-align: center; width: 300px; }
-        button { width: 100%; padding: 12px; background: #0078d4; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        select { width: 100%; padding: 10px; margin: 10px 0; background: #222; color: white; border-radius: 6px; border: 1px solid #333; }
-        #keyResult { background: #000; color: #00ff00; padding: 15px; margin-top: 15px; border: 1px dashed #00ff00; font-family: monospace; display: none; }
+        :root {
+            --primary: #00d2ff;
+            --secondary: #3a7bd5;
+            --bg: #050505;
+            --card-bg: rgba(20, 20, 20, 0.95);
+        }
+
+        body {
+            background: var(--bg);
+            background-image: radial-gradient(circle at center, #111 0%, #000 100%);
+            color: white;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.15);
+            text-align: center;
+            width: 320px;
+            backdrop-filter: blur(10px);
+        }
+
+        h2 {
+            font-size: 22px;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            margin-left: 5px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            background: #111;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 8px;
+            margin-top: 5px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 210, 255, 0.5);
+        }
+
+        #keyResult {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(0, 210, 255, 0.05);
+            border: 1px dashed var(--primary);
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            border-radius: 8px;
+            display: none;
+            cursor: pointer;
+            animation: fadeIn 0.5s ease;
+        }
+
+        #keyResult.show {
+            display: block;
+        }
+
+        .hint {
+            font-size: 10px;
+            color: #444;
+            margin-top: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>GERADOR VIP</h2>
-        <select id="tempo">
-            <option value="1">24 Horas</option>
-            <option value="7">7 Dias</option>
-            <option value="30">30 Dias</option>
-        </select>
-        <button onclick="gerarKey()">GERAR KEY</button>
-        <div id="keyResult"></div>
+    <div class="container">
+        <h2>Yashin Gen</h2>
+        
+        <div class="input-group">
+            <label>Plano de Acesso</label>
+            <select id="tempo">
+                <option value="1">24 Horas (Trial)</option>
+                <option value="7">7 Dias (Basic)</option>
+                <option value="30">30 Dias (Prime)</option>
+            </select>
+        </div>
+
+        <button onclick="gerarKey()">Gerar Acesso VIP</button>
+
+        <div id="keyResult" onclick="copyKey()"></div>
+        <div class="hint">Clique na chave para copiar automaticamente</div>
     </div>
 </body>
 </html>
