@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Admin - Gerador de Keys</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTxuvp-qS6s8UaugTXWk_gebJdZugFWhw",
+            authDomain: "painel-loginyashin.firebaseapp.com",
+            databaseURL: "https://painel-loginyashin-default-rtdb.firebaseio.com",
+            projectId: "painel-loginyashin",
+            storageBucket: "painel-loginyashin.firebasestorage.app",
+            messagingSenderId: "618872308688",
+            appId: "1:618872308688:web:9d9d4ac17aa4d2ae4e6fd5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.gerarKey = function() {
+            const key = "YASHIN-" + Math.random().toString(36).substr(2, 8).toUpperCase();
+            const dias = parseInt(document.getElementById('tempo').value);
+            const expiracao = new Date().getTime() + (dias * 24 * 60 * 60 * 1000);
+
+            set(ref(db, 'keys/' + key), {
+                expiry: expiracao,
+                status: "active"
+            }).then(() => {
+                const res = document.getElementById('keyResult');
+                res.innerText = key;
+                res.style.display = "block";
+            }).catch(e => alert("Erro: Verifique as REGRAS do Firebase Database!"));
+        }
+    </script>
+    <style>
+        body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: #111; padding: 30px; border-radius: 12px; border: 1px solid #0078d4; text-align: center; width: 300px; }
+        button { width: 100%; padding: 12px; background: #0078d4; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        select { width: 100%; padding: 10px; margin: 10px 0; background: #222; color: white; border-radius: 6px; border: 1px solid #333; }
+        #keyResult { background: #000; color: #00ff00; padding: 15px; margin-top: 15px; border: 1px dashed #00ff00; font-family: monospace; display: none; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>GERADOR VIP</h2>
+        <select id="tempo">
+            <option value="1">24 Horas</option>
+            <option value="7">7 Dias</option>
+            <option value="30">30 Dias</option>
+        </select>
+        <button onclick="gerarKey()">GERAR KEY</button>
+        <div id="keyResult"></div>
+    </div>
+</body>
+</html>
