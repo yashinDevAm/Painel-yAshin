@@ -2,13 +2,13 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yashin Admin | Premium Key Gen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Yashin Admin - Control Panel</title>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
-        // Suas configurações do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDTxuvp-qS6s8UaugTXWk_gebJdZugFWhw",
             authDomain: "painel-loginyashin.firebaseapp.com",
@@ -23,9 +23,6 @@
         const db = getDatabase(app);
 
         window.gerarKey = function() {
-            const btn = document.querySelector('button');
-            const keyResult = document.getElementById('keyResult');
-            
             const key = "YASHIN-" + Math.random().toString(36).substr(2, 8).toUpperCase();
             const dias = parseInt(document.getElementById('tempo').value);
             const expiracao = new Date().getTime() + (dias * 24 * 60 * 60 * 1000);
@@ -35,41 +32,164 @@
                 status: "active",
                 created_at: new Date().toISOString()
             }).then(() => {
-                keyResult.innerText = key;
-                keyResult.classList.add('show');
-                btn.innerText = "KEY GERADA!";
-                setTimeout(() => btn.innerText = "GERAR NOVA KEY", 2000);
-            }).catch(e => alert("Erro nas Regras do Firebase!"));
+                const res = document.getElementById('keyResult');
+                res.innerText = key;
+                res.classList.add('active');
+            }).catch(e => alert("Erro: Verifique as regras do Firebase!"));
         }
 
         window.copyKey = function() {
             const text = document.getElementById('keyResult').innerText;
             navigator.clipboard.writeText(text);
-            alert("Copiado para a área de transferência!");
+            const btn = document.querySelector('.btn-gen');
+            const originalText = btn.innerText;
+            btn.innerText = "COPIADO!";
+            setTimeout(() => btn.innerText = originalText, 2000);
         }
     </script>
+
     <style>
-        :root {
-            --primary: #00d2ff;
-            --secondary: #3a7bd5;
-            --bg: #050505;
-            --card-bg: rgba(20, 20, 20, 0.95);
+        :root { 
+            --accent: #0078d4; 
+            --accent-glow: rgba(0, 120, 212, 0.4);
+            --bg-glass: rgba(15, 15, 15, 0.98); 
+            --border-glass: rgba(255, 255, 255, 0.05);
         }
 
-        body {
-            background: var(--bg);
-            background-image: radial-gradient(circle at center, #111 0%, #000 100%);
-            color: white;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        body { 
+            margin: 0; 
             height: 100vh;
-            margin: 0;
+            background: radial-gradient(circle, #111 0%, #000 100%); 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
+            color: #ccc;
         }
 
-        .container {
+        /* --- DESIGN IDENTICO AO MOD MENU --- */
+        .admin-card {
+            width: 90%; 
+            max-width: 340px; 
+            padding: 35px 25px;
+            background: var(--bg-glass); 
+            border: 1px solid var(--border-glass);
+            border-radius: 15px; 
+            backdrop-filter: blur(20px); 
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        h1 { 
+            color: var(--accent); 
+            font-size: 16px; 
+            letter-spacing: 4px; 
+            margin-bottom: 30px; 
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .section-header {
+            margin: 20px 0 10px 0;
+            border-left: 3px solid var(--accent);
+            padding-left: 12px;
+            text-align: left;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        select {
+            width: 100%; 
+            padding: 12px; 
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass); 
+            border-radius: 8px;
+            color: #fff; 
+            outline: none; 
+            margin-bottom: 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-gen {
+            width: 100%; 
+            padding: 14px; 
+            background: var(--accent);
+            border: none; 
+            border-radius: 8px; 
+            color: #fff; 
+            font-weight: bold;
+            cursor: pointer; 
+            letter-spacing: 1px;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-gen:active { transform: scale(0.98); opacity: 0.8; }
+
+        #keyResult {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed var(--accent);
+            color: #fff;
+            font-family: monospace;
+            font-size: 16px;
+            border-radius: 8px;
+            display: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #keyResult.active { display: block; animation: glow 1.5s infinite alternate; }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(0, 120, 212, 0.2); }
+            to { box-shadow: 0 0 15px rgba(0, 120, 212, 0.5); }
+        }
+
+        .footer-text {
+            font-size: 10px;
+            color: #444;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-card">
+        <h1>Admin Control</h1>
+        
+        <div class="section-header">
+            <h2>Configuração de Key</h2>
+        </div>
+
+        <select id="tempo">
+            <option value="1">24 HORAS (TESTE)</option>
+            <option value="7">7 DIAS (SEMANAL)</option>
+            <option value="30">30 DIAS (MENSAL)</option>
+            <option value="365">ACESSO VITALÍCIO</option>
+        </select>
+
+        <button class="btn-gen" onclick="gerarKey()">Gerar Acesso</button>
+
+        <div id="keyResult" onclick="copyKey()"></div>
+        
+        <p class="footer-text">Toque na key para copiar</p>
+    </div>
+
+</body>
+</html>
             background: var(--card-bg);
             padding: 40px;
             border-radius: 20px;
